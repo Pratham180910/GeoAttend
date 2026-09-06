@@ -4,69 +4,83 @@ GeoAttend is a full-stack web application for managing event attendance using QR
 
 The system allows organizers to create events and generate unique QR codes for attendance sessions. Attendees scan the QR code using their device, provide their location through the browser's Geolocation API, and can submit attendance only when they are within the configured geofence radius of the event venue.
 
-The application uses React for the frontend and Supabase for authentication, database storage, and Row Level Security.
+The application uses React for the frontend and Supabase for authentication, database storage, and Row Level Security. The production application is deployed on Vercel.
+
+## Live Demo
+
+**Live Application:** https://geo-attend-beta.vercel.app
+
+The live deployment can be used to test the complete GeoAttend workflow, including authentication, event management, QR scanning, location verification, and attendance recording.
 
 ---
 
 ## Objective
 
-The main objective of GeoAttend is to provide a simple and secure attendance system that combines:
+The objective of GeoAttend is to provide a simple and secure attendance management system that reduces manual attendance work and helps prevent attendance from being marked by users who are not physically present at the event location.
 
-- QR-based event identification
-- User authentication
-- Device geolocation
-- Geofence-based attendance verification
-- Database-level duplicate prevention
-- Role-based access through Supabase Row Level Security
-- Organizer attendance monitoring and analytics
+The system combines:
+
+- QR code-based attendance
+- Browser-based geolocation
+- Configurable geofencing
+- Authentication
+- Supabase database storage
+- Row Level Security
+- Organizer dashboards
+- Attendance reports
 
 ---
 
 ## Features
 
-### Attendee Side
+### Attendee Features
 
-- User authentication using Supabase Authentication
-- Access to event/session information
-- QR code scanning using the device camera
-- Client-side QR decoding using `jsQR`
-- Automatic navigation to the attendance verification page after scanning
-- Browser/device geolocation access
-- Distance calculation between the attendee and event venue
-- Configurable geofence radius for each event
-- Inside/outside geofence verification
-- Attendance submission after successful location verification
-- Prevention of duplicate attendance submissions
-- Clear feedback when the attendee is outside the allowed area
-- Attendance confirmation after successful submission
+- User authentication
+- View available and upcoming events
+- View event name, venue, date, and time
+- Scan event-specific QR codes using the device camera
+- Request the attendee's current location using the browser Geolocation API
+- Verify whether the attendee is within the configured event geofence
+- Submit attendance after successful verification
+- Prevent duplicate attendance for the same event
+- Display attendance confirmation after successful submission
 
-### Organizer Side
+### Organizer Features
 
-- Organizer authentication
 - Organizer dashboard
 - Create events
 - Edit events
 - Delete events
-- Configure event name, venue, date, time and geofence radius
-- Generate a unique QR code for each event/session
-- Display QR codes for attendees
+- Configure event venue, date, time, and geofence radius
+- Generate unique QR codes for events
 - View attendance records
+- Search and filter attendees
+- View attendance statistics
 - Monitor attendance information
-- Reports and analytics dashboard
-- Attendance and geofence-related statistics
-- Session performance information
+- Generate attendance reports
 
-### Testing Features
+### Security and Validation
 
-GeoAttend includes a GPS scenario simulator that allows different location conditions to be tested without physically changing location.
+- Authentication through Supabase Auth
+- Protected application routes
+- QR validation
+- Location-based geofence verification
+- Duplicate attendance prevention
+- Supabase Row Level Security (RLS)
+- Attendance records associated with authenticated users
+- Organizer-only access to organizer functionality
 
-The simulator supports:
+### Testing
 
-- Inside the geofence
-- Boundary/near-boundary conditions
-- Outside the geofence
+The application has been tested in the deployed environment using a mobile device, including:
 
-This makes it easier to verify that attendance is correctly allowed or blocked.
+- QR code scanning
+- Camera access
+- Browser geolocation
+- Geofence verification
+- Attendance submission
+- Duplicate attendance handling
+- Organizer attendance updates
 
 ---
 
@@ -74,18 +88,13 @@ This makes it easier to verify that attendance is correctly allowed or blocked.
 
 ### Frontend
 
-- React 19
+- React
 - Vite
-- JavaScript
-- Tailwind CSS
 - React Router
+- Tailwind CSS
+- JavaScript
 - Lucide React
 - Recharts
-
-### QR Code
-
-- `qrcode` — QR code generation
-- `jsqr` — QR code scanning and decoding
 
 ### Backend and Database
 
@@ -94,291 +103,377 @@ This makes it easier to verify that attendance is correctly allowed or blocked.
 - Supabase Authentication
 - Supabase Row Level Security (RLS)
 
-### Additional Libraries
+### QR and Location
 
-- `xlsx`
-- `clsx`
-- `tailwind-merge`
-- `autoprefixer`
-- PostCSS
+- `qrcode`
+- `jsqr`
+- Browser Camera API
+- Browser Geolocation API
+
+### Deployment
+
+- Vercel
+- GitHub
+
+### Data Export
+
+- SheetJS / `xlsx`
 
 ---
 
 ## Application Architecture
 
 ```text
-User / Attendee
-       |
-       v
-React Frontend
-       |
-       +--------------------+
-       |                    |
-       v                    v
-QR Scanner            Browser Geolocation
-       |                    |
-       +---------+----------+
-                 |
-                 v
-        Geofence Verification
-                 |
-                 v
-          Supabase Backend
-                 |
-        +--------+--------+
-        |                 |
-        v                 v
-   PostgreSQL       Authentication
-        |
-        v
- Attendance Records
+                    ┌─────────────────────┐
+                    │      Attendee       │
+                    │                     │
+                    │  Login              │
+                    │  View Events        │
+                    │  Scan QR            │
+                    │  Share Location     │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │     React + Vite    │
+                    │      Frontend       │
+                    │                     │
+                    │  QR Validation      │
+                    │  Location Check     │
+                    │  UI / Routing      │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │       Supabase      │
+                    │                     │
+                    │  Authentication     │
+                    │  PostgreSQL         │
+                    │  Row Level Security │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │      Organizer      │
+                    │      Dashboard      │
+                    │                     │
+                    │ Events              │
+                    │ Attendance          │
+                    │ Reports             │
+                    └─────────────────────┘
+How Attendance Works
 
- ---
+The attendance process follows these steps:
 
-## Installation
+The organizer creates an event.
+The organizer configures the event venue and geofence radius.
+GeoAttend generates a unique QR code for the event.
+The attendee scans the QR code using their device.
+The QR code identifies the attendance event.
+The attendee grants location permission through the browser.
+GeoAttend obtains the device's current latitude and longitude.
+The application compares the attendee's location with the event location.
+If the attendee is within the configured geofence, attendance can be submitted.
+The attendance record is stored in Supabase.
+Duplicate attendance for the same event is prevented.
+The organizer can view the updated attendance record from the dashboard.
+Geolocation Verification
 
-### Prerequisites
+GeoAttend uses the browser's Geolocation API to obtain the attendee's current coordinates.
 
-- Node.js
-- npm
-- A Supabase project
+The application then calculates the distance between:
 
-### Clone the Repository
+The event's configured location
+The attendee's reported location
 
-```bash
-git clone <YOUR_GITHUB_REPOSITORY_URL>
-cd GeoAttend
+The attendance request is accepted only when the calculated distance is within the event's configured geofence radius.
 
-Install Dependencies
-npm install
+Advanced anti-GPS-spoofing mechanisms are outside the scope of this project.
+
+Project Structure
+GeoAttend/
+│
+├── public/
+│
+├── src/
+│   ├── assets/
+│   │
+│   ├── components/
+│   │   ├── charts/
+│   │   │   ├── ArrivalPatternChart.jsx
+│   │   │   ├── AttendanceTrendsChart.jsx
+│   │   │   └── DepartmentBreakdownChart.jsx
+│   │   │
+│   │   └── common/
+│   │       ├── Badge.jsx
+│   │       ├── Button.jsx
+│   │       ├── Card.jsx
+│   │       ├── EmptyState.jsx
+│   │       ├── Modal.jsx
+│   │       ├── ProtectedRoute.jsx
+│   │       ├── QRCodeDisplay.jsx
+│   │       ├── SearchInput.jsx
+│   │       └── StatCard.jsx
+│   │
+│   ├── context/
+│   │   └── AuthContext.jsx
+│   │
+│   ├── data/
+│   │   └── mockData.js
+│   │
+│   ├── hooks/
+│   │   ├── useAttendance.js
+│   │   ├── useAuth.js
+│   │   ├── useEvents.js
+│   │   ├── useGeolocation.js
+│   │   └── useMockAuth.js
+│   │
+│   ├── layouts/
+│   │   ├── AttendeeLayout.jsx
+│   │   └── OrganizerLayout.jsx
+│   │
+│   ├── lib/
+│   │   └── supabaseClient.js
+│   │
+│   ├── pages/
+│   │   ├── attendee/
+│   │   │   ├── LocationVerification.jsx
+│   │   │   ├── Scan.jsx
+│   │   │   └── Success.jsx
+│   │   │
+│   │   ├── auth/
+│   │   │   └── Login.jsx
+│   │   │
+│   │   └── organizer/
+│   │       ├── Dashboard.jsx
+│   │       ├── EventAttendance.jsx
+│   │       ├── EventDetails.jsx
+│   │       ├── Events.jsx
+│   │       └── Reports.jsx
+│   │
+│   ├── utils/
+│   │   ├── formatters.js
+│   │   └── geoUtils.js
+│   │
+│   ├── App.jsx
+│   ├── App.css
+│   ├── index.css
+│   └── main.jsx
+│
+├── supabase/
+│   └── migrations/
+│
+├── .gitignore
+├── README.md
+├── package.json
+├── package-lock.json
+├── postcss.config.js
+├── tailwind.config.js
+├── vercel.json
+└── vite.config.js
+Database
+
+GeoAttend uses Supabase PostgreSQL as its backend database.
+
+The database stores information related to:
+
+Users
+Events
+Event registrations
+Attendance records
+
+Row Level Security policies are used to control access to the stored data.
+
+Examples include:
+
+Attendees can create attendance records for themselves.
+Attendees can view their own attendance.
+Organizers can view attendance associated with their events.
+Organizer actions are protected through authentication and database policies.
 Environment Variables
 
-Create a .env.local file in the project root:
+Create a .env.local file in the project root for local development.
 
 VITE_SUPABASE_URL=your_supabase_project_url
 VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
 
-Replace the placeholder values with your own Supabase project credentials.
+The production deployment uses the same environment variables configured securely in the Vercel project settings.
 
-The .env.local file must not be committed to GitHub.
+Important
 
-Supabase Database Configuration
+Do not commit .env.local to GitHub.
 
-GeoAttend uses Supabase PostgreSQL for storing event and attendance information.
+The project uses a .gitignore rule to prevent local environment files from being committed.
 
-The database migrations are located in:
+The Supabase publishable key is intended for use in frontend applications with appropriate Row Level Security policies. Secret/service-role keys must never be exposed in frontend code.
 
-supabase/migrations/
+Running the Project Locally
+1. Clone the repository
+git clone https://github.com/Pratham180910/GeoAttend.git
+cd GeoAttend
+2. Install dependencies
+npm install
+3. Configure environment variables
 
-These migrations configure the required database structure, permissions and Row Level Security policies.
+Create .env.local:
 
-The attendance table uses Row Level Security to restrict access to attendance records.
-
-Authenticated attendees can submit attendance only for their own account, while organizers can access attendance associated with their events.
-
-Running Locally
-
-Start the development server:
-
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
+4. Start the development server
 npm run dev
 
 The application will normally be available at:
 
 http://localhost:5173
-
-For testing from another device on the same local network:
-
-npm run dev -- --host
-Production Deployment
-
-GeoAttend can be deployed as a production web application using Vercel.
-
-Deployment Steps
-Push the project to a GitHub repository.
-Import the repository into Vercel.
-Add the following environment variables in the Vercel project settings:
-VITE_SUPABASE_URL
-VITE_SUPABASE_PUBLISHABLE_KEY
-Deploy the application.
-Open the generated Vercel URL.
-
-The deployed application can then be accessed through the internet without running the development server locally.
-
-Production QR Codes
-
-When GeoAttend is running on its deployed Vercel URL, generated QR codes use the deployed application URL.
-
-For example:
-
-https://your-project.vercel.app/attendee/location?eventId=...
-
-This allows attendees to scan the QR code using their phones and access the attendance system.
-
-Production Build
-
-Create a production build using:
-
+5. Build for production
 npm run build
+Deployment
 
-Preview the production build locally:
+The production version of GeoAttend is deployed using Vercel.
 
-npm run preview
+The project is connected to the GitHub repository:
+
+Pratham180910/GeoAttend
+
+The production deployment automatically builds the React/Vite application from the main branch.
+
+Production URL
+https://geo-attend-beta.vercel.app
+Vercel Configuration
+
+The project uses:
+
+Framework: Vite
+Build Command: npm run build
+Output Directory: dist
+
+A vercel.json configuration is included to support client-side React Router routes when pages are refreshed directly.
+
 API / Backend Operations
 
-GeoAttend communicates with Supabase through the Supabase JavaScript client.
+GeoAttend primarily communicates with Supabase using the Supabase JavaScript client.
 
-The main backend operations include:
+Major backend operations include:
 
-User authentication
-User session management
-Event creation
-Event retrieval
-Event editing
-Event deletion
-Attendance submission
-Attendance retrieval
-Organizer attendance monitoring
-Database access control through Row Level Security
+Authentication
+
+Used for:
+
+User login
+User sessions
+User authentication state
+Protected routes
+Events
+
+Used for:
+
+Creating events
+Updating events
+Deleting events
+Retrieving event information
+Attendance
+
+Used for:
+
+Recording attendance
+Checking existing attendance
+Retrieving attendee records
+Preventing duplicate attendance
+Security
+
+Supabase Row Level Security policies control which authenticated users can access and modify database records.
+
 Important Implementation Decisions
-QR-Based Event Identification
+QR-Based Attendance
 
-Each event has a unique QR code containing the relevant attendance session URL.
+QR codes provide a quick way to associate an attendee with a specific event.
 
-This allows attendees to access the correct event without manually entering event information.
+Each event has its own QR code containing information required to identify the attendance session.
 
-Geofence Verification
+Geofencing
 
-The attendee's device coordinates are compared with the event venue coordinates.
+Location verification adds an additional layer to attendance validation.
 
-Attendance is allowed only when the calculated distance is within the configured geofence radius.
-
-Database-Level Duplicate Prevention
-
-A unique database constraint prevents the same attendee from creating multiple attendance records for the same event.
+Instead of relying only on the QR code, GeoAttend checks whether the attendee's reported location is within the configured event radius.
 
 Row Level Security
 
-Supabase Row Level Security is used to restrict database access according to the authenticated user's identity and role.
+Supabase RLS is used instead of relying only on frontend access control.
 
-Client-Side Geofence Calculation
+This provides database-level protection for attendance and event records.
 
-The current implementation performs the distance calculation on the frontend using the coordinates reported by the browser/device.
+Duplicate Attendance Prevention
 
-Advanced GPS-spoofing protection is outside the required scope of this task.
+Attendance records use database constraints and application checks to prevent the same attendee from marking attendance multiple times for the same event.
 
-Additional Features
+Client-Side Routing
 
-In addition to the core requirements, GeoAttend includes:
-
-GPS scenario simulator
-Attendance analytics dashboard
-Geofence status visualization
-Session performance information
-Camera-based QR scanning
-Automatic navigation after QR detection
-Attendance status feedback
-Responsive attendee interface
-Testing
-Inside Geofence
-
-The simulated attendee location is placed inside the configured radius.
-
-Attendance should be allowed.
-
-Boundary
-
-The simulated attendee location is placed near the configured radius.
-
-The application's boundary behavior can be verified.
-
-Outside Geofence
-
-The simulated attendee location is placed outside the configured radius.
-
-Attendance should be blocked.
-
-Duplicate Attendance
-
-After successfully submitting attendance for an event, attempting to submit attendance for the same event again should be rejected by the database's unique constraint.
-
-QR Scanning
-
-The attendee scanner can be used with a device camera to scan the event QR code and navigate to the corresponding attendance verification page.
+React Router provides navigation between attendee and organizer pages. Vercel is configured to serve the application entry point for client-side routes so that direct URL navigation and page refreshes work correctly.
 
 Concepts Learned
 
-This project involved learning and implementing:
+During development, the following concepts were implemented and explored:
 
-React
+React component architecture
 React hooks
-Client-side routing
-Vite
-Tailwind CSS
-Supabase Authentication
+React Router
+Authentication
+Supabase
 PostgreSQL
 Row Level Security
-CRUD operations
-Database constraints
 QR code generation
 QR code scanning
 Browser Camera API
 Browser Geolocation API
-Geographic distance calculation
-Environment variables
-Frontend-backend integration
-Application debugging
-Git and GitHub workflow
-Production deployment
-Current Limitations
-
-The current geofence distance calculation is performed on the client side using the coordinates reported by the browser/device.
-
-A malicious client could potentially manipulate the coordinates reported by the browser.
-
-Advanced GPS-spoofing protection is not implemented because it is outside the required scope of the task.
-
-A production version could move geofence verification to a trusted backend environment using PostgreSQL/PostGIS or another server-side verification service.
-
-Project Structure
-GeoAttend/
-├── public/
-├── src/
-│   ├── assets/
-│   ├── components/
-│   ├── context/
-│   ├── data/
-│   ├── hooks/
-│   ├── layouts/
-│   ├── lib/
-│   ├── pages/
-│   ├── utils/
-│   ├── App.jsx
-│   ├── App.css
-│   ├── index.css
-│   └── main.jsx
-├── supabase/
-│   └── migrations/
-├── .gitignore
-├── index.html
-├── package.json
-├── package-lock.json
-├── postcss.config.js
-├── tailwind.config.js
-├── vite.config.js
-└── README.md
+Geofencing
+Distance calculation
+Protected routes
+CRUD operations
+Database constraints
+Attendance validation
+Data export
+Vite production builds
+Git and GitHub
+Vercel deployment
+Client-side routing in production
 Future Improvements
 
 Possible future improvements include:
 
-Server-side geofence verification
-Advanced GPS-spoofing detection
+More advanced anti-GPS-spoofing mechanisms
+Push notifications
 Real-time attendance updates
-More advanced attendance analytics
-Improved mobile experience
-Detailed audit logs
-Additional reporting and export functionality
-Conclusion
+Improved analytics
+Attendance history for attendees
+More detailed organizer reports
+Improved offline handling
+Additional authentication options
+Native mobile application support
+Demo
 
-GeoAttend combines QR codes, authentication, geolocation and database security to provide a practical attendance management system.
+The production application can be accessed here:
 
-The system allows organizers to manage events while attendees can quickly scan a QR code and verify their physical presence before submitting attendance.
+https://geo-attend-beta.vercel.app
+
+The main demonstration flow is:
+
+Organizer Login
+      ↓
+Create Event
+      ↓
+Generate QR Code
+      ↓
+Attendee Scans QR
+      ↓
+Location Permission
+      ↓
+Geofence Verification
+      ↓
+Attendance Recorded
+      ↓
+Organizer Views Attendance
+
+
+License
+
+This project was developed as a student project for educational and demonstration purposes.
